@@ -11,6 +11,8 @@ Index of everything under `docs/`. Project rules and commands live in [AGENTS.md
 | Adding a project, a page or a dynamic route | [llm/architecture.md](llm/architecture.md) (how-to sections)  |
 | Writing components, styles or tests         | [llm/conventions.md](llm/conventions.md)                      |
 | Changing security headers or the CSP        | [llm/architecture.md](llm/architecture.md) (Security headers) |
+| Understanding a CI failure or Renovate PR   | [dev/ci.md](dev/ci.md)                                        |
+| Deploying, previews, custom domain          | [dev/deploy.md](dev/deploy.md)                                |
 | Planning a bigger change                    | Write a plan in [plans/](plans/)                              |
 
 ## Directories

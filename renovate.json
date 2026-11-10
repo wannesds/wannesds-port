@@ -1,0 +1,20 @@
+{
+	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"extends": ["config:best-practices", "group:allNonMajor", "schedule:weekly"],
+	"labels": ["dependencies"],
+	"osvVulnerabilityAlerts": true,
+	"vulnerabilityAlerts": { "labels": ["security"] },
+	"lockFileMaintenance": { "enabled": true, "automerge": true },
+	"packageRules": [
+		{
+			"description": "Non-major updates arrive as one weekly PR and merge themselves once required checks pass",
+			"matchUpdateTypes": ["minor", "patch", "digest", "pin", "pinDigest"],
+			"automerge": true
+		},
+		{
+			"description": "TypeScript 7 is the native port; wait for typescript-eslint and svelte-check support",
+			"matchPackageNames": ["typescript"],
+			"allowedVersions": "<7"
+		}
+	]
+}
