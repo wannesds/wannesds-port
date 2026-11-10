@@ -5,13 +5,24 @@ every push and deploys `main` to production. There are no deploy secrets in GitH
 
 Because every push to `main` deploys, `main` only accepts PRs whose required checks are green (§3).
 
-First-time setup order matters: merge the skeleton first, then connect Renovate and Cloudflare
-(Cloudflare builds `main` the moment it is connected; Renovate reads its config from `main`).
+First-time setup order matters:
+
+1. Set `site.url` in `src/lib/site.ts` to the real production origin **before** the first deploy:
+   either the custom domain or `https://wannesds-port.<account-subdomain>.workers.dev` (the
+   account subdomain is shown under Workers & Pages). Every page's canonical and Open Graph URL
+   uses it, so shipping the placeholder tells search engines the site lives at example.com.
+2. Merge the skeleton (§1–§3), then connect Renovate (§4) and Cloudflare (§5). Cloudflare builds
+   `main` the moment it is connected; Renovate reads its config from `main`.
 
 ## §1 GitHub repository
 
+Run from the main checkout (`main` holds only the initial commit; the skeleton is on
+`feat/project-skeleton`):
+
 ```bash
 gh repo create wannesds-port --public --source=. --remote=origin --push
+git push -u origin feat/project-skeleton
+gh pr create --head feat/project-skeleton --base main --title "feat: project skeleton" --fill
 gh repo edit --enable-auto-merge --delete-branch-on-merge \
   --enable-squash-merge --enable-merge-commit=false --enable-rebase-merge=false
 ```
@@ -56,6 +67,8 @@ gh api -X POST "repos/$R/rulesets" --input - <<'EOF'
 EOF
 ```
 
+Then merge the skeleton once its checks are green: `gh pr merge feat/project-skeleton --squash`.
+
 ## §4 Renovate
 
 Install the Renovate GitHub App (github.com/apps/renovate) for this repository only. It finds
@@ -78,8 +91,8 @@ Install the Renovate GitHub App (github.com/apps/renovate) for this repository o
    | Build variables       | none — Node comes from `.nvmrc`, pnpm from `packageManager` |
 
 3. **Save and Deploy.** The build log should show Node 26 and pnpm 12.18. The site is then live at
-   `https://wannesds-port.<account-subdomain>.workers.dev`. Set `site.url` in `src/lib/site.ts`
-   to the production origin (no trailing slash) in a PR; canonical and Open Graph URLs use it.
+   `https://wannesds-port.<account-subdomain>.workers.dev`. Check that its canonical link shows
+   the `site.url` you set in step 1 of the setup order.
 4. **Previews:** every push to another branch builds a preview. Cloudflare comments the preview
    URL on the PR and adds a check run, which can be added to the §3 ruleset. Previews are public;
    put Cloudflare Access in front of them if that matters.

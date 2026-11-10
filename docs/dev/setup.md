@@ -3,8 +3,9 @@
 ## Prerequisites
 
 - **Node 26** — the version is in `.nvmrc`; `nvm use`, `fnm use` or `mise` pick it up.
-- **pnpm 12** — pinned exactly by `packageManager` in `package.json`. pnpm switches to that version
-  on its own; with Corepack, `corepack enable` is enough.
+- **pnpm 12** — pinned exactly by `packageManager` in `package.json`; any installed pnpm switches
+  to that version on its own. (Node 26 no longer bundles Corepack, so there is no
+  `corepack enable` step.)
 
 ## First run
 

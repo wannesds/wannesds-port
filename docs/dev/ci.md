@@ -35,9 +35,13 @@ those PRs.
 
 Config: [`renovate.json`](../../renovate.json).
 
-- `config:best-practices`: pins exact dependency versions and action digests, refreshes the
-  lockfile, and holds npm releases for 3 days (longer than pnpm's 1-day `minimumReleaseAge`, so
-  every Renovate PR installs).
+- `config:best-practices`: pins exact dependency versions and action digests, and holds npm
+  releases for 3 days — longer than pnpm's 1-day `minimumReleaseAge`, so scheduled update PRs
+  install cleanly.
+- Exception: vulnerability-fix PRs skip Renovate's 3-day hold. If the fixed version is less than
+  a day old, pnpm refuses it and the PR fails until the version ages; for an urgent fix, add the
+  package to `minimumReleaseAgeExclude` in `pnpm-workspace.yaml` temporarily.
+- `lockFileMaintenance` (in `renovate.json`) refreshes transitive versions weekly and merges itself.
 - All minor/patch/digest updates arrive as **one weekly PR** that merges itself once the
   required checks pass. Majors get their own PR and wait for a human.
 - Vulnerability fixes (GitHub advisories and OSV) ignore the schedule and are labelled `security`.
