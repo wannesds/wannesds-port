@@ -1,0 +1,9 @@
+# Headers for static assets and prerendered pages (Cloudflare Workers static assets).
+# Must live at the project root: the adapter rejects static/_headers.
+# Never applied to Worker-rendered responses; src/hooks.server.ts sets the same set there.
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), browsing-topics=()
+  Cross-Origin-Opener-Policy: same-origin
+  Content-Security-Policy: frame-ancestors 'none'
