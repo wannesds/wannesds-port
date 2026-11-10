@@ -15,7 +15,10 @@
 	{#if project.links?.length}
 		<ul class="mt-6 flex gap-4">
 			{#each project.links as link (link.href)}
-				<li><a href={link.href} class="text-accent underline">{link.label}</a></li>
+				<li>
+					<!-- Project links point off-site: rel="external" skips client-side routing. -->
+					<a href={link.href} rel="external noopener" class="text-accent underline">{link.label}</a>
+				</li>
 			{/each}
 		</ul>
 	{/if}

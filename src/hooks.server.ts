@@ -1,4 +1,4 @@
-import type { Handle } from '@sveltejs/kit';
+import type { Handle } from '@sveltejs/kit/hooks';
 
 // Worker-rendered responses (404s, non-prerendered routes) never get the root `_headers`
 // file, which only covers static assets. Keep this set identical to `_headers`; the CSP,
