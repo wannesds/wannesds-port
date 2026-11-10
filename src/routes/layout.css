@@ -1,2 +1,16 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
+
+/* Placeholder neutrals; each pair passes WCAG AA in both schemes. Dark mode follows the OS. */
+@theme {
+	--color-canvas: light-dark(#ffffff, #121212);
+	--color-panel: light-dark(#f4f4f5, #1e1e20);
+	--color-ink: light-dark(#18181b, #f4f4f5);
+	--color-ink-muted: light-dark(#52525b, #a1a1aa);
+	--color-line: light-dark(#e4e4e7, #2e2e32);
+	--color-accent: light-dark(#1d4ed8, #93c5fd);
+}
+
+:root {
+	color-scheme: light dark;
+}
