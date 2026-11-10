@@ -1,0 +1,17 @@
+# Settings only: this is a single-package repo, not a workspace.
+
+# Dependency install scripts are blocked unless listed here.
+allowBuilds:
+  # Downloads the local Workers runtime used by `wrangler dev`.
+  workerd: true
+  # Downloads the platform binary Vite uses for transforms.
+  esbuild: true
+
+# Refuse to install on a Node/pnpm version outside `engines`.
+engineStrict: true
+
+# Skip versions published less than a day ago; most malicious releases are pulled within hours.
+minimumReleaseAge: 1440
+
+# Transitive dependencies must come from the registry, never from git URLs or tarballs.
+blockExoticSubdeps: true

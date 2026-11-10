@@ -8,21 +8,21 @@
 
 **Tech Stack:** SvelteKit 3.1 · Svelte 5 (runes) · TypeScript 6 · Vite 8 · Tailwind CSS 4.3 · `@sveltejs/adapter-cloudflare` 8 · Wrangler 4 · Vitest 5 · Playwright 1.65 + `@axe-core/playwright` · pnpm 12 · Node 26 LTS · GitHub Actions · Renovate · Cloudflare Workers Builds.
 
-**Spec:** this document's [Design](#design) section. Facts marked *(verified)* were checked against a throwaway scaffold on 2026-11-10 (sv 1.3.0, adapter-cloudflare 8.0.2, wrangler 4.158, vitest 5.1).
+**Spec:** this document's [Design](#design) section. Facts marked _(verified)_ were checked against a throwaway scaffold on 2026-11-10 (sv 1.3.0, adapter-cloudflare 8.0.2, wrangler 4.158, vitest 5.1).
 
 ## Status
 
-| Task | Status | Evidence |
-|---|---|---|
-| 0 Root commit, branch, worktree | ☐ | |
-| 1 Scaffold + toolchain | ☐ | |
-| 2 Content model | ☐ | |
-| 3 Shell, routes, SEO, a11y | ☐ | |
-| 4 Security headers + CSP | ☐ | |
-| 5 Agent + project docs | ☐ | |
-| 6 CI, security, Renovate | ☐ | |
-| 7 Publish + connect (PAUSE) | ☐ | |
-| 8 Final docs pass | ☐ | |
+| Task                            | Status | Evidence |
+| ------------------------------- | ------ | -------- |
+| 0 Root commit, branch, worktree | ☐      |          |
+| 1 Scaffold + toolchain          | ☐      |          |
+| 2 Content model                 | ☐      |          |
+| 3 Shell, routes, SEO, a11y      | ☐      |          |
+| 4 Security headers + CSP        | ☐      |          |
+| 5 Agent + project docs          | ☐      |          |
+| 6 CI, security, Renovate        | ☐      |          |
+| 7 Publish + connect (PAUSE)     | ☐      |          |
+| 8 Final docs pass               | ☐      |          |
 
 ## Worktree and branch
 
@@ -44,16 +44,16 @@
 
 - Cloudflare **Workers** with static assets, not Pages (Cloudflare's current target for new projects; static asset requests are free and unlimited).
 - Root `src/routes/+layout.ts` sets `prerender = true`. A route that opts out (`prerender = false`) becomes Worker-rendered — see the header table below.
-- A URL matching no asset falls through to the Worker, which renders `src/routes/+error.svelte` with status 404 *(verified)*.
-- `/about/` resolves to `/about` through Workers' default trailing-slash handling *(verified)*.
+- A URL matching no asset falls through to the Worker, which renders `src/routes/+error.svelte` with status 404 _(verified)_.
+- `/about/` resolves to `/about` through Workers' default trailing-slash handling _(verified)_.
 - SvelteKit 3 has no `svelte.config.js`; all kit options (adapter, `csp`, `prerender`) go in `sveltekit({...})` in `vite.config.ts`.
 
 ### Security headers: two delivery paths, one header set
 
-| Response source | Mechanism |
-|---|---|
-| Prerendered pages and assets | `_headers` at the **project root**. The adapter refuses `static/_headers` with a build error *(verified)* and appends its own `/_app/immutable/*` cache rules. |
-| Worker responses (404 now, dynamic routes later) | `handle` in `src/hooks.server.ts`. `_headers` never applies to Worker output *(verified)*. |
+| Response source                                  | Mechanism                                                                                                                                                      |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Prerendered pages and assets                     | `_headers` at the **project root**. The adapter refuses `static/_headers` with a build error _(verified)_ and appends its own `/_app/immutable/*` cache rules. |
+| Worker responses (404 now, dynamic routes later) | `handle` in `src/hooks.server.ts`. `_headers` never applies to Worker output _(verified)_.                                                                     |
 
 Header set on both paths:
 
@@ -66,14 +66,14 @@ Cross-Origin-Opener-Policy: same-origin
 
 plus `frame-ancestors 'none'`: `_headers` sends `Content-Security-Policy: frame-ancestors 'none'`; on Worker responses SvelteKit's own CSP header already contains it.
 
-CSP comes from SvelteKit's `csp` option with `mode: 'auto'`: sha256 hashes in a `<meta>` tag on prerendered pages, a nonce-based header on Worker responses *(verified)*. Directives:
+CSP comes from SvelteKit's `csp` option with `mode: 'auto'`: sha256 hashes in a `<meta>` tag on prerendered pages, a nonce-based header on Worker responses _(verified)_. Directives:
 
 ```
 default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;
 font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
 ```
 
-- `style-src` needs `'unsafe-inline'`: SvelteKit's own markup sets inline `style` attributes and logs CSP violations without it *(verified)*.
+- `style-src` needs `'unsafe-inline'`: SvelteKit's own markup sets inline `style` attributes and logs CSP violations without it _(verified)_.
 - A `<meta>` CSP ignores `frame-ancestors`, which is why `_headers` repeats it.
 - HSTS is set at the Cloudflare zone once a custom domain exists (runbook §5), not in `_headers`.
 
@@ -137,11 +137,13 @@ mdsvex, i18n (`sv add paraglide`), component tests (`sv add vitest="usages:compo
 ### Task 1: Scaffold and harden the toolchain
 
 **Files:**
+
 - Create (via sv): `package.json`, `pnpm-workspace.yaml`, `vite.config.ts`, `tsconfig.json`, `wrangler.jsonc`, `playwright.config.ts`, `eslint.config.js`, `prettier.config.js`, `.prettierignore`, `.gitignore`, `.vscode/`, `src/app.html`, `src/app.d.ts`, `src/routes/*`, `static/robots.txt`
 - Create: `.nvmrc`
 - Delete: `src/lib/vitest-examples/` and any scaffold `*.e2e.ts`, if generated
 
 **Interfaces:**
+
 - Produces scripts: `dev` (`vite dev`), `build` (`vite build`), `preview` (`wrangler dev .svelte-kit/cloudflare/_worker.js --port 4173`, as scaffolded), `check` (`svelte-kit sync && svelte-check --tsconfig ./tsconfig.json`), `lint`, `format`, `test:unit` (`vitest`), `test:e2e` (`playwright test`), `test` (`pnpm test:unit --run && pnpm test:e2e`).
 
 - [ ] **Step 1: Scaffold into the worktree**
@@ -169,10 +171,12 @@ Expected: ends with `You're all set!`; `wrangler.jsonc` has `main: ".svelte-kit/
 ### Task 2: Content model
 
 **Files:**
+
 - Create: `src/lib/content/projects.ts`
 - Test: `src/lib/content/projects.spec.ts`
 
 **Interfaces:**
+
 - Produces:
 
 ```ts
@@ -225,12 +229,14 @@ describe('getProject', () => {
 ### Task 3: Site shell, routes, SEO, accessibility
 
 **Files:**
+
 - Create: `src/lib/site.ts`, `src/lib/components/site-header.svelte`, `src/lib/components/site-footer.svelte`, `src/lib/components/seo.svelte`, `src/routes/+layout.ts`, `src/routes/+error.svelte`, `src/routes/about/+page.svelte`, `src/routes/projects/+page.svelte`, `src/routes/projects/[slug]/+page.ts`, `src/routes/projects/[slug]/+page.svelte`
 - Modify: `src/routes/+layout.svelte`, `src/routes/+page.svelte`, `src/routes/layout.css`
 - Test: `src/routes/site.e2e.ts`
 - Dependency: `pnpm add -D @axe-core/playwright`
 
 **Interfaces:**
+
 - Consumes: `Project`, `listProjects()`, `getProject()` from Task 2.
 - Produces:
   - `src/lib/site.ts`: `export const site = { name, description, url, nav } as const`. `name` is a placeholder (`'wannesds'`). `url` is the production origin with no trailing slash; it starts as `'https://example.com'` with `// TODO: set to the production origin (docs/dev/deploy.md)`. `nav` is `[{ href: '/', label: 'Home' }, { href: '/projects', label: 'Projects' }, { href: '/about', label: 'About' }]`.
@@ -266,11 +272,13 @@ describe('getProject', () => {
 ### Task 4: Security headers and CSP
 
 **Files:**
+
 - Create: `_headers` (project root), `src/hooks.server.ts`
 - Modify: `vite.config.ts` (add `csp` inside `sveltekit({...})`)
 - Test: `src/routes/security.e2e.ts`
 
 **Interfaces:**
+
 - Consumes: the routes from Task 3.
 - Produces: `export const handle: Handle` in `src/hooks.server.ts`.
 
@@ -295,7 +303,9 @@ for (const path of ['/', '/nope']) {
 
 test('prerendered page carries hashed csp meta', async ({ page }) => {
 	await page.goto('/');
-	const csp = await page.locator('meta[http-equiv="content-security-policy"]').getAttribute('content');
+	const csp = await page
+		.locator('meta[http-equiv="content-security-policy"]')
+		.getAttribute('content');
 	expect(csp).toContain("script-src 'self' 'sha256-");
 });
 
@@ -316,6 +326,7 @@ test('worker response carries nonce csp header', async ({ request }) => {
 ### Task 5: Agent and project docs
 
 **Files:**
+
 - Create: `AGENTS.md`, `CLAUDE.md`, `.mcp.json`, `docs/README.md`, `docs/llm/architecture.md`, `docs/llm/conventions.md`, `docs/dev/setup.md`
 - Modify: `README.md`
 
@@ -370,6 +381,7 @@ test('worker response carries nonce csp header', async ({ request }) => {
 ### Task 6: CI, security checks, dependency automation
 
 **Files:**
+
 - Create: `.github/workflows/ci.yaml`, `.github/workflows/security.yaml`, `renovate.json`, `docs/dev/ci.md`, `docs/dev/deploy.md`
 - Modify: `docs/README.md` (link the two new docs)
 
@@ -518,15 +530,15 @@ Then merge the PR: `gh pr merge --squash`. `main` now only receives green, PR-re
 1. Dashboard → **Workers & Pages** → **Create application** → **GitHub**. Authorise the Cloudflare GitHub app for `wannesds-port` only, then pick the repo.
 2. Settings:
 
-   | Field | Value |
-   |---|---|
-   | Worker name | `wannesds-port` (must equal `name` in `wrangler.jsonc`, or the build fails) |
-   | Production branch | `main` |
-   | Build command | `pnpm build` |
-   | Deploy command | `npx wrangler deploy` (default) |
-   | Non-production builds | on; preview command left at default |
-   | Root directory | empty |
-   | Build variables | none (Node comes from `.nvmrc`, pnpm from `packageManager`) |
+   | Field                 | Value                                                                       |
+   | --------------------- | --------------------------------------------------------------------------- |
+   | Worker name           | `wannesds-port` (must equal `name` in `wrangler.jsonc`, or the build fails) |
+   | Production branch     | `main`                                                                      |
+   | Build command         | `pnpm build`                                                                |
+   | Deploy command        | `npx wrangler deploy` (default)                                             |
+   | Non-production builds | on; preview command left at default                                         |
+   | Root directory        | empty                                                                       |
+   | Build variables       | none (Node comes from `.nvmrc`, pnpm from `packageManager`)                 |
 
 3. **Save and Deploy**. The build log should show Node 26.x and pnpm 12.18.0. The site is then live at `https://wannesds-port.<subdomain>.workers.dev`.
 4. **PR previews:** every non-`main` branch push builds a preview. Cloudflare comments the Preview URL on the PR and adds a check run. You can add that check to the §3 ruleset. Previews are public; put Cloudflare Access in front if needed.
@@ -536,8 +548,8 @@ Then merge the PR: `gh pr merge --squash`. `main` now only receives green, PR-re
    - Then under **SSL/TLS → Edge Certificates**: enable **Always Use HTTPS** and **HSTS**. Turn on `includeSubDomains`/preload only if every subdomain serves HTTPS.
 6. **Troubleshooting:**
 
-   | Symptom | Fix |
-   |---|---|
-   | Build fails on the Worker name | Make the dashboard name match `wrangler.jsonc` |
-   | Lockfile or pnpm errors | `packageManager` is missing or wrong |
-   | Wrong Node version | Check `.nvmrc`, or set a `NODE_VERSION` build variable |
+   | Symptom                        | Fix                                                    |
+   | ------------------------------ | ------------------------------------------------------ |
+   | Build fails on the Worker name | Make the dashboard name match `wrangler.jsonc`         |
+   | Lockfile or pnpm errors        | `packageManager` is missing or wrong                   |
+   | Wrong Node version             | Check `.nvmrc`, or set a `NODE_VERSION` build variable |
